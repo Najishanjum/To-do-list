@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>To‑Do List</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-wrapper">
+      <div class="app-card">
+        <header class="app-header">
+          <h1 class="app-title">To‑Do-list</h1>
+          <div class="header-actions">
+            <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode" title="Toggle dark mode">
+              <i class="icon" data-feather="moon"></i>
+            </button>
+            <button id="settings-toggle" class="icon-btn" aria-label="Open settings" title="Background settings">
+              <i data-feather="settings"></i>
+            </button>
+          </div>
+        </header>
+
+        <main class="layout">
+          <aside class="sidebar">
+            <nav class="quick-filters" aria-label="Quick filters">
+              <button class="chip is-active" data-filter="all">All</button>
+              <button class="chip" data-filter="active">Active</button>
+              <button class="chip" data-filter="completed">Completed</button>
+              <button class="chip" data-filter="high">High Priority</button>
+            </nav>
+            <section class="categories">
+              <h3>Categories</h3>
+              <ul id="category-list" class="category-list"></ul>
+            </section>
+          </aside>
+
+          <section class="content">
+            <div class="add-bar">
+              <form id="add-form" class="add-form" autocomplete="off">
+                <label for="task-input" class="sr-only">Add a new task</label>
+                <input id="task-input" name="task" type="text" placeholder="Add a new task..." maxlength="200" />
+                <div class="add-row">
+                  <input id="emoji-input" type="text" inputmode="text" autocomplete="off" placeholder="😀" title="Emoji" maxlength="2" />
+                  <select id="priority-select" title="Priority">
+                    <option value="medium">Priority: Medium</option>
+                    <option value="high">Priority: High</option>
+                    <option value="low">Priority: Low</option>
+                  </select>
+                  <input id="category-input" type="text" placeholder="Category (e.g., Work)" />
+                  <input id="due-input" type="datetime-local" title="Due date & time" />
+                  <select id="recurring-select" title="Recurring">
+                    <option value="none">One‑time</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                  <button id="add-btn" type="submit" class="primary-btn">Add</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="toolbar">
+              <input id="search-input" type="search" placeholder="Search tasks..." />
+              <select id="sort-select" title="Sort by">
+                <option value="createdAt-desc">Newest</option>
+                <option value="name-asc">Name A→Z</option>
+                <option value="dueAt-asc">Due soon</option>
+                <option value="priority-desc">Priority</option>
+              </select>
+              <div class="counts" aria-live="polite">
+                <span id="task-count">0</span> items left
+              </div>
+            </div>
+
+            <section class="stats">
+              <div class="progress">
+                <div id="progress-bar" class="progress-bar" style="width:0%"></div>
+              </div>
+              <div class="stats-row">
+                <div id="streak" class="streak">🔥 0‑day streak</div>
+                <div class="today-summary"><span id="today-done">0</span>/<span id="today-total">0</span> today</div>
+              </div>
+            </section>
+
+            <div id="bulk-bar" class="bulk-bar" hidden>
+              <div><span id="bulk-count">0</span> selected</div>
+              <div class="bulk-actions">
+                <button id="bulk-complete" class="icon-btn" title="Mark selected complete"><i data-feather="check-circle"></i> Complete</button>
+                <button id="bulk-delete" class="icon-btn" title="Delete selected"><i data-feather="trash-2"></i> Delete</button>
+                <button id="bulk-cancel" class="icon-btn" title="Exit selection"><i data-feather="x"></i> Cancel</button>
+              </div>
+            </div>
+
+            <ul id="task-list" class="task-list" aria-label="To‑Do items"></ul>
+          </section>
+        </main>
+
+        <footer class="app-footer">
+          <div class="footer-actions">
+            <button id="bulk-toggle" class="icon-btn" title="Select multiple"><i data-feather="square"></i> Bulk</button>
+            <button id="export-json" class="icon-btn" title="Export JSON"><i data-feather="download"></i> Export</button>
+            <label class="icon-btn" title="Import JSON">
+              <i data-feather="upload"></i> Import
+              <input id="import-json" type="file" accept="application/json" hidden />
+            </label>
+          </div>
+          <div id="settings-panel" class="settings-panel" hidden>
+            <div class="bg-controls">
+              <label>Background color <input id="bg-color" type="color" /></label>
+              <label>Background image URL <input id="bg-image" type="url" placeholder="https://..." /></label>
+              <button id="bg-apply" class="icon-btn">Apply</button>
+            </div>
+          </div>
+          <p>Changes are saved automatically.</p>
+        </footer>
+      </div>
+    </div>
+
+    <div id="snackbar" class="snackbar" role="status" aria-live="polite" hidden>
+      <span id="snackbar-text"></span>
+      <button id="snackbar-undo" class="link-btn">Undo</button>
+    </div>
+
+    <div id="confetti-root" class="confetti-root" aria-hidden="true"></div>
+
+    <!-- Task Detail Modal -->
+    <div id="task-modal" class="modal" hidden>
+      <div class="modal-backdrop"></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <header class="modal-header">
+          <h3 id="modal-title">Task details</h3>
+          <button id="modal-close" class="icon-btn" aria-label="Close"><i data-feather="x"></i></button>
+        </header>
+        <div class="modal-body">
+          <div class="field">
+            <label>Title</label>
+            <input id="modal-title-input" type="text" />
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <textarea id="modal-description" rows="4" placeholder="Add details..."></textarea>
+          </div>
+          <div class="field row">
+            <label>Priority</label>
+            <select id="modal-priority">
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div class="field row">
+            <label>Category</label>
+            <input id="modal-category" type="text" />
+          </div>
+          <div class="field row">
+            <label>Due</label>
+            <input id="modal-due" type="datetime-local" />
+          </div>
+        </div>
+        <footer class="modal-footer">
+          <button id="modal-save" class="primary-btn">Save</button>
+        </footer>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="script.js" defer></script>
+  </body>
+  </html>
+
