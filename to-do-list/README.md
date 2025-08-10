@@ -35,4 +35,5 @@ It features **task priority management, categories, due dates, streak tracking, 
  🚀 Installation & Usage
 1. **Clone this repository**
    ```bash
-   git clone LINK here
+
+   git clone https://github.com/Najishanjum/To-do-list/tree/main/to-do-list
